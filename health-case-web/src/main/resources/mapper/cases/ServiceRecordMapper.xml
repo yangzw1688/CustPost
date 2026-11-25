@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+       PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+       "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kaiyun.modules.cases.mapper.ServiceRecordMapper">
+
+    <!-- 已绑定保单使用保单上的被保险人，历史未绑定案件沿用被保险人主数据。 -->
+    <sql id="insuredContact">
+        CASE WHEN sp.id IS NOT NULL THEN sp.insured_name ELSE si.name END AS insuredName,
+        CASE WHEN sp.id IS NOT NULL THEN sp.insured_phone ELSE si.phone END AS insuredPhone
+    </sql>
+
+    <sql id="adminListRows">
+        SELECT sr.id, sr.name, sr.phone, sr.case_title, sr.case_description,
+               sr.visit_date, sr.status, sr.process_remark, sr.create_time, sr.update_time,
+               NULLIF(TRIM(sr.reporter_name), '') AS reporter_name, NULLIF(TRIM(sr.reporter_phone), '') AS reporter_phone,
+               pr.decision AS review_decision, pr.payout_amount, pr.payment_confirmed_at,
+               sp.policy_no, sp.product_name, <include refid="insuredContact"/>
+        FROM service_record sr
+        LEFT JOIN service_policy sp ON sp.id = sr.policy_id
+        LEFT JOIN service_insured si ON si.id = sr.insured_id
+        LEFT JOIN case_payment_review pr ON pr.case_id = sr.id
+    </sql>
+
+    <sql id="adminListFilters">
+        <where>
+            <if test="query.name != ''">AND LOCATE(LOWER(#{query.name}), LOWER(sr.name)) &gt; 0</if>
+            <if test="query.phone != ''">AND LOCATE(#{query.phone}, sr.phone) &gt; 0</if>
+            <if test="query.caseTitle != ''">AND LOCATE(LOWER(#{query.caseTitle}), LOWER(sr.case_title)) &gt; 0</if>
+            <if test="query.policyNo != ''">AND EXISTS (SELECT 1 FROM service_policy p WHERE p.id = sr.policy_id AND LOCATE(LOWER(#{query.policyNo}), LOWER(p.policy_no)) &gt; 0)</if>
+            <if test="query.status != ''">AND sr.status = #{query.status}</if>
+            <if test="query.reviewPending">AND sr.status IN ('PENDING','PROCESSING')
+                AND NOT EXISTS (SELECT 1 FROM case_payment_review pending_review WHERE pending_review.case_id = sr.id)</if>
+            <if test="query.fromTime != null">AND sr.create_time &gt;= #{query.fromTime}</if>
+            <if test="query.untilTime != null">AND sr.create_time &lt; #{query.untilTime}</if>
+        </where>
+    </sql>
+
+    <select id="countAdminPage" resultType="long">
+        SELECT COUNT(*) FROM service_record sr <include refid="adminListFilters"/>
+    </select>
+
+    <select id="selectAdminPage" resultType="com.kaiyun.modules.cases.vo.AdminServiceRecordListVO">
+        <include refid="adminListRows"/>
+        <include refid="adminListFilters"/>
+        ORDER BY sr.create_time DESC, sr.id DESC
+        LIMIT #{query.size} OFFSET #{offset}
+    </select>
+
+    <select id="selectAdminList" resultType="com.kaiyun.modules.cases.vo.AdminServiceRecordListVO">
+        <include refid="adminListRows"/>
+        ORDER BY sr.create_time DESC, sr.id DESC
+    </select>
+
+    <sql id="paidCases">
+        FROM case_payment_review pr
+        JOIN service_record sr ON sr.id = pr.case_id
+        LEFT JOIN service_policy sp ON sp.id = sr.policy_id
+        WHERE sr.status = 'COMPLETED' AND pr.decision = 'APPROVED'
+          AND pr.payout_amount &gt; 0 AND pr.payment_confirmed_at IS NOT NULL
+        <if test="query.name != ''">
+            AND LOCATE(LOWER(#{query.name}), LOWER(COALESCE(NULLIF(TRIM(sr.reporter_name), ''), sr.name))) &gt; 0
+        </if>
+        <if test="query.policyNo != ''">AND LOCATE(LOWER(#{query.policyNo}), LOWER(sp.policy_no)) &gt; 0</if>
+        <if test="query.fromTime != null">AND pr.payment_confirmed_at &gt;= #{query.fromTime}</if>
+        <if test="query.untilTime != null">AND pr.payment_confirmed_at &lt; #{query.untilTime}</if>
+    </sql>
+
+    <select id="countPaidCases" resultType="long">
+        SELECT COUNT(*) <include refid="paidCases"/>
+    </select>
+
+    <select id="selectPaidCases" resultType="com.kaiyun.modules.cases.vo.PaidCaseVO">
+        SELECT sr.id, sr.case_title, NULLIF(TRIM(sr.reporter_name), '') AS reporter_name, sr.name AS patient_name,
+               sp.policy_no, pr.payout_amount, pr.payment_confirmed_by, pr.payment_confirmed_at, sr.process_remark
+        <include refid="paidCases"/>
+        ORDER BY pr.payment_confirmed_at DESC, sr.id DESC
+        LIMIT #{query.size} OFFSET #{offset}
+    </select>
+
+
+
+    <!--
+        ============================================================
+        案件详情查询
+        ============================================================
+
+        service_record
+            |
+            | insured_id
+            v
+        service_insured
+
+        service_record
+            |
+            | policy_id
+            v
+        service_policy
+
+        图片另外通过 service_record_image 查询
+    -->
+
+    <select id="selectDetailById"
+            parameterType="java.lang.Long"
+            resultType="com.kaiyun.modules.cases.vo.ServiceRecordDetailVO">
+
+        SELECT
+
+        /* ==================== 案件基本信息 ==================== */
+
+        sr.id AS id,
+
+        sr.name AS name,
+
+        sr.phone AS phone,
+
+        sr.case_title AS caseTitle,
+
+        sr.visit_date AS visitDate,
+
+        sr.case_description AS caseDescription,
+
+        sr.status AS status,
+
+        sr.create_time AS createTime,
+
+        sr.update_time AS updateTime,
+
+        sr.process_remark AS processRemark,
+        pr.decision AS reviewDecision,
+        pr.payout_amount AS payoutAmount,
+        pr.review_remark AS reviewRemark,
+        pr.reviewer_phone AS reviewerPhone,
+        pr.reviewed_at AS reviewedAt,
+        pr.payment_confirmed_by AS paymentConfirmedBy,
+        pr.payment_confirmed_at AS paymentConfirmedAt,
+
+
+        /* ==================== 报案人 ==================== */
+
+        NULLIF(TRIM(sr.reporter_name), '') AS reporterName,
+
+        NULLIF(TRIM(sr.reporter_phone), '') AS reporterPhone,
+
+        NULLIF(TRIM(sr.reporter_id_type), '') AS reporterIdType,
+
+        NULLIF(TRIM(sr.reporter_id_no), '') AS reporterIdNo,
+
+
+        /* ==================== 被保险人 ==================== */
+
+        si.id AS insuredId,
+
+        <include refid="insuredContact"/>,
+
+        CASE WHEN sp.id IS NOT NULL THEN sp.insured_id_type ELSE si.id_type END AS insuredIdType,
+
+        CASE WHEN sp.id IS NOT NULL THEN sp.insured_id_no ELSE si.id_no END AS insuredIdNo,
+
+        si.gender AS insuredGender,
+
+        si.birthday AS insuredBirthday,
+
+
+        /* ==================== 保单 ==================== */
+
+        sp.id AS policyId,
+
+        sp.policy_no AS policyNo,
+
+        sp.product_name AS productName,
+        sp.insurer_name AS insurerName,
+
+        sp.applicant_name AS applicantName,
+
+        sp.applicant_id_type AS applicantIdType,
+
+        sp.applicant_id_no AS applicantIdNo,
+
+        sp.applicant_phone AS applicantPhone,
+
+        sp.insured_name AS policyInsuredName,
+
+        sp.insured_id_type AS policyInsuredIdType,
+
+        sp.insured_id_no AS policyInsuredIdNo,
+
+        sp.insured_phone AS policyInsuredPhone,
+
+        sp.premium AS premium,
+
+        sp.status AS policyStatus,
+
+        sp.start_date AS policyStartDate,
+
+        sp.end_date AS policyEndDate
+
+
+        FROM service_record sr
+
+        /* 被保险人 */
+        LEFT JOIN service_insured si
+        ON sr.insured_id = si.id
+
+        /* 保单 */
+        LEFT JOIN service_policy sp
+        ON sr.policy_id = sp.id
+        LEFT JOIN case_payment_review pr ON pr.case_id = sr.id
+
+        WHERE sr.id = #{id}
+
+        LIMIT 1
+
+    </select>
+
+</mapper>

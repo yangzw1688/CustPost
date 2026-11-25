@@ -1,0 +1,24 @@
+{
+  "name": "health-case-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "test": "node --test src/shared/auth/auth-client.test.mjs src/shared/files/case-files.test.mjs"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "sass": "^1.104.1",
+    "sass-loader": "^17.0.1"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "axios": "^1.20.0",
+    "element-plus": "^2.14.5",
+    "vue": "3",
+    "vue-router": "4"
+  }
+}

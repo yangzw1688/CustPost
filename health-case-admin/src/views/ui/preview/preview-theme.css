@@ -1,0 +1,80 @@
+html.mobile-page-preview {
+  --hc-primary: #1677ff;
+  --hc-ink: #243850;
+  --hc-muted: #8592a5;
+  --hc-border: #e6edf5;
+  --el-color-primary: #1677ff;
+  --el-color-primary-light-3: #5c9fff;
+  --el-color-primary-light-5: #8bbbff;
+  --el-color-primary-light-7: #b9d6ff;
+  --el-color-primary-light-8: #d0e4ff;
+  --el-color-primary-light-9: #e8f1ff;
+  --el-color-primary-dark-2: #1260cc;
+  --el-border-radius-base: 8px;
+  --el-font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--el-font-family);
+  color: var(--hc-ink);
+  background: #f2f5fa;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mobile-page-preview *,
+.mobile-page-preview *::before,
+.mobile-page-preview *::after { box-sizing: border-box; }
+.mobile-page-preview a { text-decoration: none; }
+.mobile-page-preview :is(button, input, textarea) { font: inherit; }
+.mobile-page-preview button { cursor: pointer; }
+.mobile-page-preview :is(a, button):focus-visible { outline: 3px solid #81b4fa; outline-offset: 3px; }
+.mobile-page-preview button:disabled { cursor: not-allowed; }
+.mobile-page-preview .el-dialog { max-width: calc(100vw - 32px); border-radius: 16px; }
+.mobile-page-preview #app .original-page {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #f5f7fa;
+}
+
+.mobile-page-preview .tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 20;
+  display: flex;
+  justify-content: space-around;
+  padding: 11px 12px calc(11px + env(safe-area-inset-bottom));
+  background: #fffffff5;
+  backdrop-filter: blur(12px);
+  border-top: 1px solid #edf0f6;
+  box-shadow: 0 -4px 18px #183b6804;
+}
+
+.mobile-page-preview .tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 90px;
+  padding: 2px 12px;
+  color: #929dad;
+  font-size: 11px;
+}
+
+.mobile-page-preview .tab-item.active { color: #1677ff; font-weight: 600; }
+
+@media (min-width: 768px) {
+  .mobile-page-preview .original-page { box-shadow: 0 0 32px #29446a0c; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-page-preview *,
+  .mobile-page-preview *::before,
+  .mobile-page-preview *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

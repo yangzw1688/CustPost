@@ -1,0 +1,59 @@
+:root {
+  color: #243746;
+  background: #f2f6f8;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  --el-font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  --el-color-primary: #18746b;
+  --el-color-primary-dark-2: #10594f;
+  --el-color-primary-light-3: #5c9d96;
+  --el-color-primary-light-5: #88b8b3;
+  --el-color-primary-light-7: #b7d5d1;
+  --el-color-primary-light-8: #cee4e0;
+  --el-color-primary-light-9: #e6f1ef;
+  --el-border-radius-base: 8px;
+  --management-border: #dce7eb;
+  --management-muted: #617584;
+  --management-ink: #243746;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+.page-title { color: #233746; font-size: 20px; font-weight: 600; }
+.page-desc { margin-top: 8px; color: #617584; }
+.page-card + .page-card { margin-top: 16px; }
+
+.management-page { display: grid; gap: 20px; min-width: 0; }
+.management-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 15px; min-width: 0; }
+.management-heading h1 { margin: 0; font-size: clamp(22px, 2.4vw, 28px); font-weight: 670; color: var(--management-ink); }
+.management-heading p { margin: 8px 0 0; color: var(--management-muted); font-size: 14px; line-height: 1.55; }
+.management-heading > .el-button { margin-top: 3px; }
+.management-surface.el-card { min-width: 0; border: 1px solid var(--management-border); border-radius: 12px; }
+.management-surface > .el-card__header { color: var(--management-ink); font-weight: 650; }
+.management-surface > .el-card__body { padding: 19px; }
+.management-table-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; margin: 0 0 14px; }
+.management-table-heading h2 { margin: 0; font-weight: 650; font-size: 17px; }
+.management-table-heading > span { color: var(--management-muted); font-size: 13px; }
+.management-alert { margin: 0 0 14px; }
+.management-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 16px; }
+.management-filters .el-form-item { flex: 1 0 145px; max-width: 250px; min-width: 0; margin: 0; }
+.management-filters .el-form-item .el-form-item__label { margin-bottom: 7px; font-weight: 550; }
+.management-filters .el-form-item.management-date-filter { flex-basis: 270px; max-width: 328px; }
+.management-filters .el-date-editor.el-input__wrapper { width: 100%; min-width: 0; }
+.management-filter-actions { display: flex; align-items: center; }
+.management-table { width: 100%; --el-table-header-bg-color: #f0f5f6; --el-table-header-text-color: #38515f; }
+.management-table .el-table__cell { padding-top: 11px; padding-bottom: 11px; }
+.management-pagination { display: flex; justify-content: flex-end; overflow-x: auto; margin-top: 18px; }
+.compact-records { display: none; }
+
+@media (max-width: 760px) {
+  .management-page { gap: 14px; }
+  .management-heading { gap: 8px; }
+  .management-heading p { font-size: 13px; }
+  .management-surface > .el-card__body { padding: 14px; }
+  .management-filters { gap: 12px; }
+  .management-filters .el-form-item { flex-basis: calc(50% - 6px); max-width: unset; }
+  .management-filters .el-form-item.management-date-filter { flex-basis: 100%; max-width: unset; }
+  .management-filter-actions { width: 100%; }
+  .management-pagination { justify-content: flex-start; max-width: 100%; }
+  .desktop-records { display: none; }
+  .compact-records { display: block; }
+}

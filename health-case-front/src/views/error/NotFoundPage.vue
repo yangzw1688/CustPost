@@ -1,0 +1,2 @@
+<template><main class="not-found"><span>404</span><h1>这个页面暂时找不到了</h1><p>您可以返回首页，继续办理健康服务。</p><RouterLink to="/">返回首页</RouterLink></main></template>
+<style scoped>.not-found { padding: 15vh 24px; text-align: center; }.not-found > span { font-size: 80px; font-weight: 700; color: #b6d1c2; }.not-found h1 { font-size: 24px; }.not-found p { font-size: 14px; color: var(--hc-muted); }.not-found a { display: inline-block; margin-top: 24px; color: white; background: var(--hc-primary); padding: 12px 24px; border-radius: 12px; }</style>

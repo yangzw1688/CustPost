@@ -1,0 +1,13 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0">
+  <id>distribution</id>
+  <formats><format>zip</format></formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <files>
+    <file><source>${project.build.directory}/${project.build.finalName}.jar</source><outputDirectory>/</outputDirectory></file>
+    <file><source>CONFIGURATION.md</source><outputDirectory>config-templates</outputDirectory><destName>README.md</destName></file>
+    <file><source>src/main/resources/application-standalone.properties</source><outputDirectory>config-templates</outputDirectory></file>
+  </files>
+  <fileSets>
+    <fileSet><directory>src/main/resources/nacos</directory><outputDirectory>config-templates/nacos</outputDirectory></fileSet>
+  </fileSets>
+</assembly>

@@ -1,0 +1,26 @@
+-- 平台只读操作日志。仅存储脱敏身份与允许记录的摘要，不保存完整请求参数。
+CREATE TABLE IF NOT EXISTS platform_operation_log (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    module VARCHAR(32) NOT NULL,
+    module_name VARCHAR(64) NOT NULL,
+    action VARCHAR(64) NOT NULL,
+    action_name VARCHAR(80) NOT NULL,
+    operator VARCHAR(32) NOT NULL,
+    target VARCHAR(160) NOT NULL,
+    version BIGINT,
+    published_version BIGINT,
+    successful BOOLEAN NOT NULL,
+    http_status INT NOT NULL,
+    duration_ms BIGINT NOT NULL,
+    request_method VARCHAR(8) NOT NULL,
+    request_path VARCHAR(240) NOT NULL,
+    client_ip VARCHAR(64) NOT NULL,
+    public_ip VARCHAR(64) NOT NULL DEFAULT '',
+    ip_source VARCHAR(16) NOT NULL DEFAULT 'UNAVAILABLE',
+    details VARCHAR(2000) NOT NULL,
+    error_message VARCHAR(200) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_platform_log_time (created_at, id),
+    INDEX idx_platform_log_module (module, created_at, id),
+    INDEX idx_platform_log_operator (operator, created_at, id)
+);
