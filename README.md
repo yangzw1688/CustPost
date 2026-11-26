@@ -23,6 +23,8 @@ java -jar .\health-case-web\target\health-case.jar
 
 启动前配置 `DB_URL`、`DB_USERNAME` 和 `DB_PASSWORD`。病例附件上传需要 `OBS_ENDPOINT`、`OBS_BUCKET`、`OBS_ACCESS_KEY` 和 `OBS_SECRET_KEY`。初始化主超级管理员需要 `ADMIN_ROOT_PHONE` 和 `ADMIN_ROOT_PASSWORD`。本地测试登录使用 `AUTH_TEST_CODE_ENABLED` 和 `AUTH_TEST_CODE`。
 
+用户端默认使用真实短信登录。阿里云签名、模板和本地连接配置见[短信登录说明](health-case-web/LOGIN.md)。
+
 真实连接信息可写在运行目录下的 `config/application-standalone.properties`，公共本地配置可写在 `config/application.properties`。两个文件均由 Git 忽略。如果本机 Maven 曾把仓库设在已删除的目录，可使用 `-Dmaven.repo.local=实际仓库路径` 覆盖。
 
 ## 代码目录

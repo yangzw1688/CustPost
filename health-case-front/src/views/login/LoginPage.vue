@@ -12,7 +12,7 @@
         <div class="form-item">
           <el-icon aria-hidden="true"><Iphone /></el-icon>
           <input id="login-phone" v-model="phone" name="phone" type="tel" inputmode="numeric" maxlength="11"
-            autocomplete="tel" placeholder="请输入手机号" :disabled="loading" required
+            autocomplete="tel" placeholder="请输入手机号" :disabled="loading || sending" required
             @input="phone = phone.replace(/\D/g, '').slice(0, 11)" />
         </div>
       </div>
@@ -22,7 +22,7 @@
         <div class="form-item">
           <el-icon aria-hidden="true"><Key /></el-icon>
           <input id="login-code" v-model="code" name="code" type="text" inputmode="numeric" maxlength="6"
-            autocomplete="one-time-code" placeholder="请输入六位验证码" :disabled="loading" required
+            autocomplete="one-time-code" placeholder="请输入短信中的六位验证码" :disabled="loading || sending" required
             @input="code = code.replace(/\D/g, '').slice(0, 6)" />
           <button type="button" class="code-btn" :disabled="countdown > 0 || sending || loading" @click="getCode">
             {{ sending ? '获取中…' : countdown > 0 ? countdown + ' 秒后重试' : '获取验证码' }}
@@ -32,13 +32,13 @@
 
       <p v-if="message" class="login-message" role="status">{{ message }}</p>
       <p v-if="errorMessage" class="login-error" role="alert">{{ errorMessage }}</p>
-      <button type="submit" class="login-btn" :disabled="loading">{{ loading ? '登录中…' : '登录' }}</button>
+      <button type="submit" class="login-btn" :disabled="loading || sending">{{ loading ? '登录中…' : '登录' }}</button>
     </form>
   </main>
 </template>
 
 <script setup>
-import { onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Iphone, Key } from '@element-plus/icons-vue'
 import { login, safeRedirect, sendCode, PHONE_PATTERN, CODE_PATTERN } from '@/utils/auth'
@@ -55,6 +55,12 @@ const errorMessage = ref(route.query.reason === 'unavailable' ? '暂时无法连
 let timer
 let disposed = false
 
+watch(phone, () => {
+  code.value = ''
+  message.value = ''
+  errorMessage.value = ''
+})
+
 async function getCode() {
   if (sending.value || countdown.value > 0 || loading.value) return
   message.value = ''
@@ -67,8 +73,9 @@ async function getCode() {
   try {
     const response = await sendCode(phone.value)
     if (disposed) return
+    code.value = ''
     message.value = response?.message || '验证码已发送'
-    countdown.value = 60
+    countdown.value = response?.cooldownSeconds ?? 60
     timer = setInterval(() => { if (--countdown.value <= 0) clearInterval(timer) }, 1000)
   } catch (error) {
     if (!disposed) errorMessage.value = error.message || '获取验证码失败，请重试'
@@ -78,7 +85,7 @@ async function getCode() {
 }
 
 async function submitLogin() {
-  if (loading.value) return
+  if (loading.value || sending.value) return
   if (!PHONE_PATTERN.test(phone.value) || !CODE_PATTERN.test(code.value)) {
     errorMessage.value = '请填写有效的手机号和六位验证码'
     return

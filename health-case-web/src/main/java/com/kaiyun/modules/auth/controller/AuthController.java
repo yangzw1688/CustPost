@@ -5,7 +5,6 @@ import com.kaiyun.modules.auth.service.LoginService;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -26,12 +25,10 @@ public class AuthController {
     }
 
     @PostMapping("/send-code")
-    public Result<Map<String, Object>> sendCode(@RequestBody LoginRequest input) {
-        loginService.validatePhone(input.getPhone());
-        Map<String, Object> data = new LinkedHashMap<>();
-        data.put("testMode", true);
-        data.put("message", "测试验证码为" + loginService.testCode() + "，无需接收短信");
-        return Result.success(data);
+    public Result<Map<String, Object>> sendCode(@RequestBody LoginRequest input,
+            HttpServletRequest request, HttpServletResponse response) {
+        response.setHeader("Cache-Control", "no-store");
+        return Result.success(loginService.sendCode(input.getPhone(), request.getRemoteAddr()));
     }
 
     @PostMapping("/login")
